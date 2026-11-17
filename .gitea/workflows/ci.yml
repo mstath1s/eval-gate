@@ -1,0 +1,36 @@
+# Tests only: no network, no API key. The offline fixtures make this runnable anywhere.
+#
+# This file targets the self-hosted runner. If no runner is registered, the workflow queues and
+# never executes -- check /api/v1/repos/<owner>/<repo>/actions/tasks before trusting a badge.
+# The job image must contain `node`, because actions/checkout is a Node action.
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Python version
+        run: python3 --version
+
+      - name: Unit tests
+        env:
+          PYTHONPATH: src
+        run: python3 -m unittest discover -s tests -t . -v
+
+      - name: Offline gate must fail on the known fixture failures
+        env:
+          PYTHONPATH: src
+        run: |
+          set +e
+          python3 -m evalgate run --suite suites/support-triage.json --offline \
+            --gate gates/default.json --out out --quiet
+          code=$?
+          echo "exit=$code"
+          test "$code" -eq 1

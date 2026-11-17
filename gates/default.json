@@ -1,0 +1,8 @@
+{
+  "min_pass_rate": 0.9,
+  "max_error_rate": 0.0,
+  "max_p95_latency_ms": 8000,
+  "max_total_cost_usd": 0.05,
+  "max_failures_per_grader": { "json_keys": 0 },
+  "require_all_cases": true
+}

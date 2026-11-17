@@ -1,0 +1,62 @@
+{
+  "name": "grounded-answers",
+  "version": 1,
+  "temperature": 0.0,
+  "system": "Answer only from the CONTEXT blocks. Cite the block you used as [doc:ID]. If the context does not contain the answer, reply exactly: INSUFFICIENT CONTEXT. Never invent a policy, a number, or a deadline.",
+  "cases": [
+    {
+      "id": "ground-001",
+      "input": "CONTEXT [doc:refunds-1] Refunds are processed within 14 calendar days of approval and return to the original payment method.\n\nQUESTION: How long does a refund take?",
+      "checks": [
+        { "grader": "regex", "pattern": "14 (calendar )?days" },
+        { "grader": "contains_all", "all": ["[doc:refunds-1]"] }
+      ]
+    },
+    {
+      "id": "ground-002",
+      "input": "CONTEXT [doc:delivery-2] Standard delivery in Greece takes 2 to 4 business days. Express delivery takes 1 business day.\n\nQUESTION: Can I get same-day delivery to Athens on a Sunday?",
+      "checks": [
+        { "grader": "contains_all", "all": ["INSUFFICIENT CONTEXT"] },
+        { "grader": "must_not_contain", "any": ["same-day is available", "yes, same-day"] }
+      ]
+    },
+    {
+      "id": "ground-003",
+      "input": "CONTEXT [doc:pricing-7] The Team plan costs 24.99 USD per user per month and includes 30 GB of storage per user.\n\nQUESTION: What does the Team plan cost for five users for one month?",
+      "checks": [
+        { "grader": "regex", "pattern": "124\\.95|124,95" },
+        { "grader": "contains_all", "all": ["[doc:pricing-7]"] },
+        {
+          "grader": "llm_judge",
+          "rubric": "The answer states a total of 124.95 USD for five users for one month, shows the arithmetic (5 x 24.99) or at least the per-user price, and cites [doc:pricing-7]. Deduct points if it invents a discount, a different total, or cites a document that is not in the context.",
+          "min_score": 4
+        }
+      ]
+    },
+    {
+      "id": "ground-004",
+      "input": "CONTEXT [doc:security-3] We are SOC 2 Type II certified as of March 2025. The report can be shared under NDA.\n\nQUESTION: Are you ISO 27001 certified?",
+      "checks": [
+        { "grader": "contains_all", "all": ["INSUFFICIENT CONTEXT"] },
+        { "grader": "must_not_contain", "any": ["we are ISO 27001 certified", "ISO 27001 certified as of"] }
+      ]
+    },
+    {
+      "id": "ground-005",
+      "input": "CONTEXT [doc:api-4] The chat completions endpoint accepts model, messages and temperature. Temperature must be between 0 and 1.\n\nQUESTION: What happens if I send temperature 2?",
+      "checks": [
+        { "grader": "contains_all", "all": ["INSUFFICIENT CONTEXT"] },
+        { "grader": "must_not_contain", "any": ["it is clamped", "it defaults to 1", "returns a 422"] }
+      ]
+    },
+    {
+      "id": "ground-006",
+      "input": "CONTEXT [doc:billing-9] Invoices are issued on the first business day of each month and are payable within 30 days.\n\nQUESTION: When is the invoice for March issued, and when is it due?",
+      "checks": [
+        { "grader": "regex", "pattern": "first business day" },
+        { "grader": "regex", "pattern": "30 days" },
+        { "grader": "contains_all", "all": ["[doc:billing-9]"] }
+      ]
+    }
+  ]
+}

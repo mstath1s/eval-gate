@@ -1,0 +1,8 @@
+{
+  "CONTEXT [doc:refunds-1] Refunds are processed within 14 calendar days of approval and return to the original payment method.\n\nQUESTION: How long does a refund take?": "A refund is processed within 14 calendar days of approval and returns to the original payment method [doc:refunds-1].",
+  "CONTEXT [doc:delivery-2] Standard delivery in Greece takes 2 to 4 business days. Express delivery takes 1 business day.\n\nQUESTION: Can I get same-day delivery to Athens on a Sunday?": "INSUFFICIENT CONTEXT",
+  "CONTEXT [doc:pricing-7] The Team plan costs 24.99 USD per user per month and includes 30 GB of storage per user.\n\nQUESTION: What does the Team plan cost for five users for one month?": "Five users cost 5 x 24.99 = 124.95 USD for one month [doc:pricing-7].",
+  "CONTEXT [doc:security-3] We are SOC 2 Type II certified as of March 2025. The report can be shared under NDA.\n\nQUESTION: Are you ISO 27001 certified?": "INSUFFICIENT CONTEXT",
+  "CONTEXT [doc:api-4] The chat completions endpoint accepts model, messages and temperature. Temperature must be between 0 and 1.\n\nQUESTION: What happens if I send temperature 2?": "INSUFFICIENT CONTEXT",
+  "CONTEXT [doc:billing-9] Invoices are issued on the first business day of each month and are payable within 30 days.\n\nQUESTION: When is the invoice for March issued, and when is it due?": "The invoice is issued on the first business day of March and is payable within 30 days [doc:billing-9]."
+}

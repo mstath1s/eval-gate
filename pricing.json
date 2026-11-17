@@ -1,0 +1,38 @@
+{
+  "source": "https://docs.mistral.ai/inference/pricing",
+  "retrieved": "2026-11-17",
+  "unit": "usd_per_million_tokens",
+  "note": "Prices are copied from the vendor page on the date above. Re-check before trusting a cost number: the gate reports cost as 'unknown' rather than guessing when a model is missing here.",
+  "models": {
+    "mistral-small-4-0-26-03": {
+      "aliases": ["mistral-small-latest", "mistral-small"],
+      "input": 0.15,
+      "cached_input": 0.015,
+      "output": 0.6
+    },
+    "mistral-large-4-0": {
+      "aliases": ["mistral-large-latest", "mistral-large"],
+      "input": 0.7,
+      "cached_input": 0.07,
+      "output": 2.1
+    },
+    "zai-glm-5-3-flash": {
+      "aliases": [],
+      "input": 0.15,
+      "cached_input": 0.03,
+      "output": 0.5
+    },
+    "ministral-3-8b-25-12": {
+      "aliases": ["ministral-8b-latest"],
+      "input": 0.15,
+      "cached_input": 0.015,
+      "output": 0.15
+    },
+    "codestral-25-08": {
+      "aliases": ["codestral-latest"],
+      "input": 0.3,
+      "cached_input": 0.03,
+      "output": 0.9
+    }
+  }
+}
