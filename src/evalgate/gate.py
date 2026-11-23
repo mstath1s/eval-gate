@@ -20,6 +20,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 from .types import RunReport
+from .validate import validate_gate
 
 DEFAULT_GATE = {
     "min_pass_rate": 0.9,
@@ -52,10 +53,15 @@ def load_gate(path: str | Path | None) -> dict:
     config = dict(DEFAULT_GATE)
     if path is None:
         return config
-    loaded = json.loads(Path(path).read_text(encoding="utf-8"))
-    unknown = set(loaded) - set(DEFAULT_GATE)
-    if unknown:
-        raise ValueError(f"{path}: unknown gate keys {sorted(unknown)}")
+    try:
+        loaded = json.loads(Path(path).read_text(encoding="utf-8"))
+    except FileNotFoundError:
+        raise ValueError(f"{path}: no such file") from None
+    except json.JSONDecodeError as exc:
+        raise ValueError(
+            f"{path}: not valid JSON — line {exc.lineno}, column {exc.colno}: {exc.msg}"
+        ) from None
+    validate_gate(loaded, str(path)).raise_for_errors(path)
     config.update(loaded)
     return config
 

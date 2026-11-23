@@ -15,23 +15,29 @@ from typing import Any
 from .graders import DETERMINISTIC, grade_llm_judge
 from .providers import ProviderError
 from .types import Case, CaseResult, Grade, RunReport
+from .validate import validate_suite
 
 
 def load_suite(path: str | Path) -> dict:
-    data = json.loads(Path(path).read_text(encoding="utf-8"))
-    if "cases" not in data or not isinstance(data["cases"], list) or not data["cases"]:
-        raise ValueError(f"{path}: a suite needs a non-empty 'cases' array")
-    for index, raw in enumerate(data["cases"]):
-        for field in ("id", "input", "checks"):
-            if field not in raw:
-                raise ValueError(f"{path}: case #{index} is missing {field!r}")
-        if not raw["checks"]:
-            raise ValueError(f"{path}: case {raw['id']!r} has no checks")
-        for check in raw["checks"]:
-            name = check.get("grader")
-            if name != "llm_judge" and name not in DETERMINISTIC:
-                raise ValueError(f"{path}: case {raw['id']!r} uses unknown grader {name!r}")
-    data.setdefault("name", Path(path).stem)
+    """Read and validate a suite file. Raises ValueError listing every problem it found.
+
+    Validation is the whole check: ``validate_suite`` names the JSON path of each mistake, so a
+    typo in ``cases[7].checks[1].equals`` costs one line of reading, not a debugging session.
+    """
+    source = Path(path)
+    try:
+        data = json.loads(source.read_text(encoding="utf-8"))
+    except FileNotFoundError:
+        raise ValueError(f"{source}: no such file") from None
+    except json.JSONDecodeError as exc:
+        raise ValueError(
+            f"{source}: not valid JSON — line {exc.lineno}, column {exc.colno}: {exc.msg}"
+        ) from None
+
+    validation = validate_suite(data, str(source))
+    validation.raise_for_errors(source)
+
+    data.setdefault("name", source.stem)
     data.setdefault("temperature", 0.0)
     return data
 

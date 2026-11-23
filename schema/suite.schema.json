@@ -1,0 +1,114 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/mstath1s/eval-gate/schema/suite.schema.json",
+  "title": "eval-gate suite",
+  "description": "A set of evaluation cases with the checks that decide whether each answer is acceptable. The normative rules live in src/evalgate/validate.py; this file is for editors and other tools.",
+  "type": "object",
+  "required": ["cases"],
+  "additionalProperties": true,
+  "properties": {
+    "name": { "type": "string", "description": "Defaults to the file name without .json." },
+    "version": { "type": "integer", "minimum": 1 },
+    "temperature": { "type": "number", "minimum": 0, "maximum": 1, "default": 0.0,
+                     "description": "Above 0.3 the validator warns: the same code passes and fails on different days." },
+    "system": { "type": "string", "description": "System prompt for cases that do not set their own." },
+    "cases": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "input", "checks"],
+        "additionalProperties": true,
+        "properties": {
+          "id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9._-]{0,63}$" },
+          "input": { "type": "string", "minLength": 1 },
+          "notes": { "type": "string", "description": "Why this case exists. The run report prints it." },
+          "system": { "type": "string" },
+          "checks": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "oneOf": [
+                { "$ref": "#/$defs/exact_match" },
+                { "$ref": "#/$defs/contains_all" },
+                { "$ref": "#/$defs/must_not_contain" },
+                { "$ref": "#/$defs/regex" },
+                { "$ref": "#/$defs/json_keys" },
+                { "$ref": "#/$defs/json_value" },
+                { "$ref": "#/$defs/llm_judge" }
+              ]
+            }
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "exact_match": {
+      "type": "object",
+      "required": ["grader", "equals"],
+      "properties": {
+        "grader": { "const": "exact_match" },
+        "equals": { "type": ["string", "number", "boolean"] }
+      }
+    },
+    "contains_all": {
+      "type": "object",
+      "required": ["grader", "all"],
+      "properties": {
+        "grader": { "const": "contains_all" },
+        "all": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "must_not_contain": {
+      "type": "object",
+      "required": ["grader", "any"],
+      "properties": {
+        "grader": { "const": "must_not_contain" },
+        "any": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "regex": {
+      "type": "object",
+      "required": ["grader", "pattern"],
+      "properties": {
+        "grader": { "const": "regex" },
+        "pattern": { "type": "string" }
+      }
+    },
+    "json_keys": {
+      "type": "object",
+      "required": ["grader", "keys"],
+      "properties": {
+        "grader": { "const": "json_keys" },
+        "keys": { "type": "array", "items": { "type": "string" } },
+        "types": {
+          "type": "object",
+          "additionalProperties": { "enum": ["string", "number", "boolean", "array", "object"] }
+        }
+      }
+    },
+    "json_value": {
+      "type": "object",
+      "required": ["grader", "key"],
+      "properties": {
+        "grader": { "const": "json_value" },
+        "key": { "type": "string" },
+        "equals": { "type": ["string", "number", "boolean"] },
+        "in": { "type": "array" }
+      },
+      "oneOf": [{ "required": ["equals"] }, { "required": ["in"] }]
+    },
+    "llm_judge": {
+      "type": "object",
+      "required": ["grader", "rubric"],
+      "properties": {
+        "grader": { "const": "llm_judge" },
+        "rubric": { "type": "string" },
+        "question": { "type": "string" },
+        "scale": { "type": "integer", "minimum": 2, "default": 5 },
+        "min_score": { "type": "integer", "minimum": 1, "default": 4 }
+      }
+    }
+  }
+}

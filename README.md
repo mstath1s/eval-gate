@@ -91,11 +91,34 @@ says it does is worse than no suite.
 
 ## Status: what works, what does not
 
-Working, covered by tests (`python -m unittest discover -s tests -t .` — 51 tests, no network):
+## Watch it work
 
-- suite loading and validation, all six deterministic graders, `llm_judge` with cost tracking
+Three ways to see what the machine did, in order of how much they explain:
+
+```bash
+eval-gate validate suites/support-triage.json --gate gates/default.json   # names every mistake, calls no model
+eval-gate run --suite suites/support-triage.json --offline --explain       # every case, then the gate arithmetic
+eval-gate run --suite suites/support-triage.json --offline --html out.html # one self-contained file for a browser
+```
+
+`--explain` prints the setup, then each case with its input, its `notes` (why the case exists), the
+answer, and every grader's verdict — then each gate check with the actual number against the
+limit, the failing checks named in words, and the limits of what the run can prove. `--html` is the
+same in one file, no assets and no JavaScript, for someone who is not at a terminal.
+
+The format is documented in `docs/SUITE-FORMAT.md`, with a table of every grader and its
+parameters, and the twelve support-triage cases and what each one is for. Machines get
+`schema/suite.schema.json` and `schema/gate.schema.json`.
+
+## Status: what works, what does not
+
+Working, covered by tests (`python -m unittest discover -s tests -t .` — 80 tests, no network):
+
+- suite and gate validation that names the JSON path of every mistake
+- suite loading, all six deterministic graders, `llm_judge` with cost tracking
 - the gate: every check, fail-closed cost handling, per-grader limits
 - end-to-end CLI runs, both `PASS` and `FAIL`, with reports written to disk
+- the explain view and the single-file HTML report
 - an offline mode that fails loudly when a scripted answer is missing
 
 Not built yet, in the order it matters:
@@ -108,7 +131,8 @@ Not built yet, in the order it matters:
    they are, treat a judge failure as a suspicion, not a fact.
 4. **Prompt/version stamping** — the report names the model but not the prompt hash or the suite
    hash, so two runs are not yet provably comparable.
-5. **A minimal web view** — the Markdown report is enough for a reviewer, not enough for a team.
+5. **Comparing runs in a view** — the HTML report covers one run. It cannot yet show this run beside
+   the previous one, which is the job of item 1.
 
 ## Design notes
 

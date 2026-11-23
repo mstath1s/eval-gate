@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/mstath1s/eval-gate/schema/gate.schema.json",
+  "title": "eval-gate gate",
+  "description": "Thresholds for a whole run. A gate decides pass or fail; a case decides pass or fail. The normative rules live in src/evalgate/validate.py.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "min_pass_rate": { "type": "number", "minimum": 0, "maximum": 1, "default": 0.9,
+                       "description": "Fraction of cases that must pass. 90 here is an error: it reads as 9000%." },
+    "max_error_rate": { "type": "number", "minimum": 0, "maximum": 1, "default": 0.0 },
+    "max_p95_latency_ms": { "type": "integer", "minimum": 0, "default": 0,
+                            "description": "0 disables the latency check." },
+    "max_total_cost_usd": { "type": "number", "minimum": 0, "default": 0,
+                            "description": "Model plus judge cost. 0 disables the cost check. An unpriced model fails the check rather than guessing." },
+    "max_failures_per_grader": {
+      "type": "object",
+      "additionalProperties": { "type": "integer", "minimum": 0 },
+      "description": "Per-grader failure allowance. A misspelt grader name is a warning: that limit could never fire."
+    },
+    "require_all_cases": { "type": "boolean", "default": true }
+  }
+}
